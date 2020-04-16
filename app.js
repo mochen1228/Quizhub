@@ -27,7 +27,7 @@ var Quiz = require('./models/models.js').Quiz;
 // var Player = require('./models/models.js').Player;
 
 // our localhost port
-const port = 4001
+const port = process.env.PORT || 4001;
 
 var app = express();
 app.use(express.static(path.join(__dirname,'client', 'build')));
