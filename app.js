@@ -30,6 +30,14 @@ var Quiz = require('./models/models.js').Quiz;
 const port = 4001
 
 var app = express();
+app.use(express.static(path.join(__dirname,'client', 'build')));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
+});
+
+// app.get('/', function (req, res) {
+//   res.sendFile(path.join(__dirname,'client', 'build', 'index.html'));
+// });
 
 // our server instance
 const server = http.createServer(app)
@@ -94,6 +102,8 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+
 
 // hard code answerStatistic, should get from database
 // var answerStatistic= [
@@ -181,6 +191,8 @@ io.on('connection', socket => {
     });
   })
 });
+
+
 
 server.listen(port, () => console.log(`Listening on port ${port}`))
 
