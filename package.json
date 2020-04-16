@@ -17,6 +17,7 @@
     "mongoose-sequence": "^5.2.2",
     "morgan": "~1.9.1",
     "rough-charts": "^0.4.2-alpha.0",
+    "semantic-ui-react": "^0.88.2",
     "socket.io": "^2.3.0"
   }
 }
