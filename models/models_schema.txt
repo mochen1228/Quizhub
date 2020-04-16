@@ -1,0 +1,84 @@
+class Question {
+    content: String,
+    option1: String,
+    option2: String,
+    option3: String,
+    option4: String,
+    answer: String,
+    time: {type: Number, default: 0},
+    update: { type: Date, default: Date.now }
+}
+
+============================================================
+// Quiezset
+// Set of questions
+// NOTE: Order of questions does matter
+
+class Quizset {
+    name: String,
+    tag: [String],
+    question_list: [{type: Number: Question<key: ObjectId>],
+    update: { type: Date, default: Date.now }
+}
+
+============================================================
+// Session
+// Active game session. Once the game is finished, this object will be destroyed.
+// Before destruction, it will create a SessionHistory object and store it.
+
+class Session {
+    gamePIN: String,
+    host: User,
+    quizset: Quizset<key: ObjectId>,
+    players: [Player],
+    records: [QuestionRecord]
+    update: { type: Date, default: Date.now }
+}
+
+============================================================
+// QuestionRecord
+// There is no key to identify which question it belongs to
+// It used the order of the question to do so
+
+class QuestionRecord {
+    questionsHistory: [QuestionHistory], 
+    option1Record: [Player],  // Players who have chosen option1
+    option1Record: [Player],
+    option1Record: [Player],
+    option1Record: [Player],
+    didNotChooseRecord: [Player]  // Players who dis not choose at all
+}
+
+============================================================
+// QuestionHistory
+
+class QuestionHistory {
+    content: String,
+    option1: String,
+    option2: String,
+    option3: String,
+    option4: String,
+    answer: String,
+    time: {type: Number, default: 0},
+    option1Record: [Player],  // Players who have chosen option1
+    option1Record: [Player],
+    option1Record: [Player],
+    option1Record: [Player],
+    didNotChooseRecord: [Player]  // Players who dis not choose at all
+}
+
+============================================================
+// SessionHistory
+// The idea is, if the creator changes the content of the question, or the 
+// order of the questions of the quiz or quizset, this history should still
+// accurately reflect history of the game
+
+class SessionHistory {
+    host: User,
+    quizset: Quizset<key: ObjectId>,
+    questionsHistory: [QuestionHistory], 
+    players: [Player],
+    update: { type: Date, default: Date.now }
+}
+
+
