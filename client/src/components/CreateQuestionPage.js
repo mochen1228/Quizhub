@@ -193,7 +193,7 @@ class CreateQuizsetPage extends Component {
     if (!this.saveQuizset()) {
       return
     }
-    axios.post('https://guarded-gorge-11703.herokuapp.com/validate-quizset', {
+    axios.post('https://guarded-gorge-11703.herokuapp.com/quizset/validate-quizset', {
       quizsetID: this.state.quizsetID
     }).then(res => {
       if (res.data.result) {
