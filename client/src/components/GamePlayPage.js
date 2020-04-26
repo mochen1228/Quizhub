@@ -18,7 +18,7 @@ class GamePlayPage extends Component {
       // Unique ID for each player. For now, it is the user's nickname
       playerID: "",
       // nickname:"",
-      socket: socketIOClient("localhost:4001"),
+      socket: socketIOClient("https://guarded-gorge-11703.herokuapp.com/"),
       quizsetName: undefined,
       quizNo: 0,
       quizset: undefined,

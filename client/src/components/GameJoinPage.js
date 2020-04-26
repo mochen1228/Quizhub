@@ -18,7 +18,7 @@ class EnterGamePinForm extends Component {
   constructor() {
     super();
     this.state = {
-      endpoint: "localhost:4001",
+      endpoint: "https://guarded-gorge-11703.herokuapp.com/",
       gamePin: "",
       nickname: "",
       newQuizsetID: "",
@@ -45,7 +45,7 @@ class EnterGamePinForm extends Component {
     // POST to express API to add a player to current game session
     // NOTE: socket emit should be inside this function to prevent
     //    loading outdated data
-    axios.post('http://localhost:4001/session/add-player', {
+    axios.post('https://guarded-gorge-11703.herokuapp.com/session/add-player', {
         gamePIN: this.state.gamePin, player: this.state.nickname
       }).then(res => {
         console.log(res);
@@ -67,7 +67,7 @@ class EnterGamePinForm extends Component {
       return;
     } 
 
-    axios.post('http://localhost:4001/session/validate-game', {
+    axios.post('https://guarded-gorge-11703.herokuapp.com/session/validate-game', {
       gamePIN: this.state.gamePin
       }).then(res=> {
         if (res.data.result === false) {
@@ -97,7 +97,7 @@ class EnterGamePinForm extends Component {
   }
 
   handleHost(event) {
-    axios.post('http://localhost:4001/quizset/create-quizset', {
+    axios.post('https://guarded-gorge-11703.herokuapp.com/quizset/create-quizset', {
       }).then(res=> {
         this.setState({newQuizsetID:res.data.quizsetID})
         this.setState({redirectHost:true});

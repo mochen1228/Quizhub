@@ -124,13 +124,13 @@ class ExplorePage extends Component {
   }
 
   componentDidMount () {
-    axios.get('http://localhost:4001/get-tags').then(res => {
+    axios.get('https://guarded-gorge-11703.herokuapp.com/get-tags').then(res => {
       console.log(res);
       console.log(res.data);
       this.setState({tag: res.data});
       })
 
-    axios.get('http://localhost:4001/quizset/get-all-quizset').then(res => {
+    axios.get('https://guarded-gorge-11703.herokuapp.com/quizset/get-all-quizset').then(res => {
     console.log(res);
     console.log(res.data);
     this.setState({quizsets: res.data});
@@ -139,14 +139,14 @@ class ExplorePage extends Component {
 
   handleTagQuizSet(selectedTag) {
     if (selectedTag === "All") {
-      axios.get('http://localhost:4001/quizset/get-all-quizset', {
+      axios.get('https://guarded-gorge-11703.herokuapp.com/quizset/get-all-quizset', {
       }).then(res => {
         this.setState({quizsets:res.data})
         this.setState({activePage:1})
       })
     } else {
       // Show specific tags
-        axios.post('http://localhost:4001/quizset/get-tag-quizset', {
+        axios.post('https://guarded-gorge-11703.herokuapp.com/quizset/get-tag-quizset', {
         tag: selectedTag
       }).then(res => {
         console.log(res);
