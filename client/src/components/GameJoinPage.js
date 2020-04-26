@@ -170,10 +170,14 @@ class GameJoinPage extends Component {
     return (
       <ResponsiveContainer>
         <Segment>
-          <Grid textAlign='center' style={{ height: '80vh' }} verticalAlign='middle'>
+          <Grid textAlign='center' style={{ height: '100vh', backgroundImage: `url(${"background1.png"})` }} verticalAlign='middle'>
             <Grid.Row>
               <Grid.Column style={{ maxWidth: 450 }}>
-                <Header as='h2' color='grey' textAlign='center'>
+                <Header as='h2' block color='grey' textAlign='center'
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.6)'
+                }}
+                >
                   Join A Game Using PIN
                 </Header>
                 <EnterGamePinForm/>
