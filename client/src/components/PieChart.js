@@ -1,5 +1,4 @@
 import * as React from 'react'
-import { Rectangle } from 'react-roughjs'
 import {
   Tooltip,
   ChartProvider,

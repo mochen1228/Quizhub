@@ -6,6 +6,7 @@ import {
     Statistic,
     Button,
     Icon,
+    Image
 } from 'semantic-ui-react'
 
 /**
@@ -36,7 +37,7 @@ class QuestionView extends Component {
         time: this.state.time - 1
       }));
     } else {
-      // this.props.changeView("wait");
+      this.props.changeView("wait");
     }
   }
 
@@ -44,6 +45,7 @@ class QuestionView extends Component {
   handleSubmit(value) {
     // record answer locally
     this.props.recordAnswer(value);
+    this.props.changeView("wait");
   }
 
   componentDidMount() {
@@ -58,7 +60,14 @@ class QuestionView extends Component {
   }
 
   render() {
+
     var quiz = this.props.quizset[this.props.quizNo];
+    const content = () =>{
+      if (quiz.picture != null && quiz.picture !== "") {
+        return <Image centered src={quiz.picture} size="large"/>
+      }
+      return <Image centered src={window.location.origin + '/background.png'} size="large"/>
+    }
     return (
       <Segment style={{height: '95vh'}}>
         <Grid centered>
@@ -92,12 +101,7 @@ class QuestionView extends Component {
           </Grid.Row>
           <Grid.Row centered style={{height: '40vh'}}>
             <Grid.Column>
-              <Segment placeholder>
-                <Header icon>
-                  <Icon name='image outline' />
-                  No Image Uploaded.
-                </Header>
-              </Segment>
+              {content()}
             </Grid.Column>
           </Grid.Row>
           <Grid.Row columns={2}>

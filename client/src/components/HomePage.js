@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
-import socketIOClient from "socket.io-client";
 import {
   Button,
   Container,
@@ -51,22 +50,7 @@ HomepageHeading.propTypes = {
 
 
 
-class HomePage extends Component {
-  // constructor(props) {
-  //     super(props);
-  //     this.state = { apiResponse: "" };
-  // }
-
-  // callAPI() {
-  //     fetch("http://localhost:8000/testAPI")
-  //         .then(res => res.text())
-  //         .then(res => this.setState({ apiResponse: res }));
-  // }
-
-  // componentWillMount() {
-  //     this.callAPI();
-  // }
-  
+class HomePage extends Component { 
   render() {
     return (
       <ResponsiveContainer activeItem='home'>

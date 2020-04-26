@@ -63,7 +63,7 @@ class RegisterForm extends Component{
       </Message>})
       return;
     }
-    if (password != password2) {
+    if (password !== password2) {
       this.setState({message: <Message negative>
         <Message.Header>Passwords are not the same</Message.Header>
       </Message>})
@@ -130,7 +130,7 @@ class RegisterForm extends Component{
               icon='lock'
               iconPosition='left'
               placeholder='Confirm password'
-              type='password2'
+              type='password'
               name="password2"
               style={{marginTop: '1em'}}
               value={this.state.password2}

@@ -9,21 +9,6 @@ import {
 } from 'semantic-ui-react'
 import RankingBar from './RankingBar'
 
-
-const data_1 = [
-  { name: 'A', value: 30},
-  { name: 'B', value: 90 },
-  { name: 'C', value: 50 },
-  { name: 'D', value: 40 },
-]
-
-const data_2 = [
-  { name: 'A', value: 3},
-  { name: 'B', value: 9 },
-  { name: 'C', value: 5 },
-  { name: 'D', value: 4 },
-]
-
 class ResultView extends Component {
   
   render() {

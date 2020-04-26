@@ -12,6 +12,7 @@ var mongoose = require("mongoose");
 var bodyParser = require('body-parser')
 var dbUrl = 'mongodb+srv://mochen1228:Mochen123!@cluster0-ouxvq.mongodb.net/test?retryWrites=true&w=majority';
 
+const axios = require("axios");
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -27,24 +28,22 @@ var Quiz = require('./models/models.js').Quiz;
 // var Player = require('./models/models.js').Player;
 
 // our localhost port
+// const port = 4001
+
 const port = process.env.PORT || 4001;
 
 var app = express();
-app.use(express.static(path.join(__dirname,'client', 'build')));
 
+// Static files directory
+app.use(express.static(path.join(__dirname, 'client', 'build')));
+
+// CORS
 app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "YOUR-DOMAIN.TLD"); // update to match the domain you will make the request from
+  res.header("Access-Control-Allow-Origin", "http://localhost:3000"); // update to match the domain you will make the request from
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
-});
-
-// app.get('/', function (req, res) {
-//   res.sendFile(path.join(__dirname,'client', 'build', 'index.html'));
-// });
 
 // our server instance
 const server = http.createServer(app)
@@ -92,6 +91,10 @@ app.use('/testAPI', testAPIRouter);
 app.use('/quizset', quizsetRouter);
 app.use('/session', sessionRouter);
 
+// Load react app
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
+});
 
 
 // catch 404 and forward to error handler
@@ -110,8 +113,6 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-
-
 // hard code answerStatistic, should get from database
 // var answerStatistic= [
 //   { name: 'A', value: 1 },
@@ -121,6 +122,7 @@ app.use(function(err, req, res, next) {
 // ];
 
 var currentSessions = {}
+
 
 // This is what the socket.io syntax is like, we will work this later
 io.on('connection', socket => {
@@ -133,11 +135,30 @@ io.on('connection', socket => {
       // console.log("FOUND DOC:", doc);
       if(err) {
         res.sendStatus(500);
-      }  else {
-        io.sockets.emit('update player list' + gamePin, doc.players);
+      } else {
+        if (doc) {
+          io.sockets.emit('update player list' + gamePin, doc.players);
+        }
       }
     });
   });
+
+    // Enter game, send the quiz name
+    socket.on('enter game', (gamePin) => {
+      currentSessions[gamePin] = {}
+      const pinFilter = {gamePIN: gamePin};
+      Game.findOne(pinFilter, function(err, game) { 
+        // console.log("FOUND DOC:", game)
+        if(err) {
+          res.sendStatus(500);
+        } else {
+          Quizset.findById(game.quizset, function(err, quizset) {
+            console.log(quizset);
+            io.sockets.emit('enter game' + gamePin, quizset.name);
+          })
+        }
+      })
+    });
 
   // Start game, send the entire quiz
   socket.on('start game', (gamePin) => {
@@ -186,6 +207,7 @@ io.on('connection', socket => {
   // disconnect is fired when a client leaves the server
   socket.on('disconnect', () => {
     console.log('user disconnected')
+
     
   });
 
@@ -197,10 +219,39 @@ io.on('connection', socket => {
       choice: info.choice
     });
   })
+
+  // Remove player from game session and notify host
+  socket.on('player leave', (info) => {
+    console.log(info.nickname, 'from game', info.gamePIN, 'has left')
+    axios.post('http://localhost:4001/session/remove-player', {
+      gamePIN: info.gamePIN,
+      player: info.nickname
+    }).then(res => {
+      const pinFilter = {gamePIN: info.gamePIN};
+      Game.findOne(pinFilter, function(err,doc) { 
+        if(err) {
+          res.sendStatus(500);
+        } else {
+          io.sockets.emit('update player list' + info.gamePIN, doc.players);
+        }
+      });
+    })
+  })
+
+  // Notify players that a host has disconnected
+  socket.on('host leave', (info) => {
+    console.log("Host of", info.gamePIN, "has left. Disconnecting players...")
+    axios.post('http://localhost:4001/session/remove-session', {
+      gamePIN: info.gamePIN
+    }).then(res => {
+      console.log("emitting:", "host left" + info.gamePIN)
+      io.sockets.emit("host left" + info.gamePIN)
+    })
+  })
+
 });
-
-
 
 server.listen(port, () => console.log(`Listening on port ${port}`))
 
 module.exports = app;
+

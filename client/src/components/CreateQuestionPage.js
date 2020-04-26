@@ -1,8 +1,6 @@
-import PropTypes from 'prop-types'
 import React, { Component } from 'react'
-import { Link, Redirect} from 'react-router-dom'
-import axios from "axios"
-
+import { Redirect} from 'react-router-dom'
+import axios from "axios" 
 import {
   Grid,
   Icon,
@@ -10,29 +8,41 @@ import {
   Segment,
   Button,
   Form,
-  Rating,
   Header,
-  Radio,
   Dropdown, 
   Menu,
   Input,
-  Label
+  Image,
+  Dimmer,
+  Loader,
+  Confirm
 } from 'semantic-ui-react'
 import ResponsiveContainer from './ResponsiveContainer'
 
 
 const tagOptions = [
-  { key: 1, value: "Math", text: 'Math'},
-  { key: 2, value: "History", text: 'History'},
-  { key: 3, value: "English", text: 'English'},
-  { key: 4, value: "Science", text: 'Science'}
+  { key: 1, value: "Arts", text: 'Arts'},
+  { key: 2, value: "Astronomy", text: 'Astronomy'},
+  { key: 3, value: "Biology", text: 'Biology'},
+  { key: 4, value: "Chemistry", text: 'Chemistry'},
+  { key: 5, value: "ComputerScience", text: 'Computer Science'},
+  { key: 6, value: "Geography", text: 'Geography'},
+  { key: 7, value: "History", text: 'History'},
+  { key: 8, value: "Languages", text: 'Languages'},
+  { key: 9, value: "Literature", text: 'Literature'},
+  { key: 10, value: "Math", text: 'Math'},
+  { key: 11, value: "Music", text: 'Music'},
+  { key: 12, value: "Physics", text: 'Physics'},
+  { key: 13, value: "Science", text: 'Science'},
+  { key: 14, value: "Sport", text: 'Sport'},
+  { key: 15, value: "Trivia", text: 'Trivia'},
 ]
 class CreateQuizsetPage extends Component {
   constructor() {
     super();
     this.state = {
       endpoint: "localhost:4001",
-      quizsetID: 1,
+      quizsetID: "",
       gamePIN: 0,
       players: [],
       redirect: false,
@@ -40,7 +50,12 @@ class CreateQuizsetPage extends Component {
       currentQuiz:{},
       currentQuizId: "",
       name: "",
-      tag: []
+      tag: [],
+      AddOrEditQuiz: false,
+      error: false,
+      errorMsg: "",
+      saved: false,
+      savedMsg: ""
     }
    
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -50,31 +65,52 @@ class CreateQuizsetPage extends Component {
     this.getQuestionById = this.getQuestionById.bind(this);
     // this.saveQuizset = this.saveQuizset.bind(this);
     this.addQuestion = this.addQuestion.bind(this);
+    this.hiddenOrShowEditQuizForm = this.hiddenOrShowEditQuizForm.bind(this)
+    this.handleSave = this.handleSave.bind(this)
   }
 
   componentDidMount () {
-    // axios.get('http://localhost:4001/create-new-session').then(res => {
-    //   console.log(res);
-    //   console.log(res.data.gamePIN);
-    //       this.setState({gamePIN: res.data.gamePIN});
-    //   })
-    // this.setState({gamePIN: 287});
+    this.setState({quizsetID: this.props.location.state.id})
     this.loadQuizSet();
   }
 
   addQuestion(id) {
-    this.setQuizId(id)
+    axios.post('http://localhost:4001/quizset/add-question', {
+      quizsetID: this.state.quizsetID
+    }).then(res => {
+      this.setQuizSet(res.data.quizset)
+      this.setQuizId(res.data.id)
+      this.setState({AddOrEditQuiz: true})
+    })
   }
 
+  handleSave() {
+    if(!this.saveQuizset()) {
+      return;
+    }
+
+    this.setState({saved: true, savedMsg:"Save the quiz successfully!"})
+  }
+
+  hiddenOrShowEditQuizForm(e) {
+    this.setState({AddOrEditQuiz: e})
+  }
   loadQuizSet() {
+    console.log("Incoming ID", this.props.location.state.id)
     // Loads quizset to the page
     // POST to express API to add a new game session to the DB collection
     axios.post('http://localhost:4001/quizset/get-quiz-set', {
-      quizsetID: this.state.quizsetID
+      quizsetID: this.props.location.state.id
     }).then(res => {
-      // console.log(res);
-      this.setQuizSet(res.data.quizzes)
-      // console.log("quizzes:", res.data.quizzes)
+      
+      if (res.data.quizzes == null || res.data.quizzes.length === 0) {
+        console.log("init add new quiz ")
+        this.addQuestion("")
+      } else {
+        this.setQuizSet(res.data.quizzes)
+        this.setQuizId(res.data.quizzes[0]._id)
+      }
+      
       this.setState({name:res.data.quizset.name})
       this.setState({tag:res.data.quizset.tag})
       })
@@ -82,6 +118,7 @@ class CreateQuizsetPage extends Component {
 
 
   getQuestionById(quizId) {
+    if (quizId == "") return
     console.log("getQuestionById id = " + quizId)
 
     axios.post('http://localhost:4001/quizset/get-quiz', {
@@ -100,7 +137,8 @@ class CreateQuizsetPage extends Component {
       option3: "",
       option4: "",
       answer: "",
-      time: ""}
+      time: "",
+      picture: ""}
       this.setState({currentQuiz:quiz})
      
   }
@@ -108,7 +146,10 @@ class CreateQuizsetPage extends Component {
   setQuizId (id) {
     this.setState({currentQuizId: id});
     this.getQuestionById(id);
+    this.hiddenOrShowEditQuizForm(true)
   }
+
+
 
   // postSession() {
   //   // POST to express API to add a new game session to the DB collection
@@ -126,50 +167,88 @@ class CreateQuizsetPage extends Component {
 
   
 
-  // saveQuizset() {
-  //   // POST to express API to add a new game session to the DB collection
-  //   axios.post('http://localhost:4001/quizset/update-quizset', {
-  //     gamePIN: this.state.gamePIN, name:this.state.name, tag: this.state.tag
-  //   }).then(res => {
-  //     // console.log(res);
-  //     })
-  // }
+  saveQuizset() {
+    console.log("save quiz set")
+    if (this.state.name == null || this.state.name === "") {
+      this.setState({error: true, errorMsg: "Please input quizset name!"})
+      return false;
+    }
+    if (this.state.tag  == null || this.state.tag.length === 0) {
+      this.setState({error: true, errorMsg: "Please choose tag!"})
+      return false;
+    } 
+
+    // POST to express API to add a new game session to the DB collection
+    axios.post('http://localhost:4001/quizset/update-quizset', {
+      quizsetID:this.state.quizsetID, name:this.state.name, tag: this.state.tag
+    }).then(res => {
+      
+      })
+
+      return true;
+  }
 
 
   handleSubmit(event) {
-    // Create new game session and redirect to the hosting page
-    axios.post('http://localhost:4001/session/create-new-session', {
+    if (!this.saveQuizset()) {
+      return
+    }
+    axios.post('http://localhost:4001/quizset/validate-quizset', {
       quizsetID: this.state.quizsetID
     }).then(res => {
-      this.setState({gamePIN: res.data.gamePIN}, function() {
-        console.log("Game PIN is " + this.state.gamePIN);
-        event.preventDefault();
-        this.setState({redirect: true});
-      });   
+      if (res.data.result) {
+        // Create new game session and redirect to the hosting page
+        axios.post('http://localhost:4001/session/create-new-session', {
+          quizsetID: this.state.quizsetID
+        }).then(res => {
+          this.setState({gamePIN: res.data.gamePIN}, function() {
+            console.log("Game PIN is " + this.state.gamePIN);
+            event.preventDefault();
+            this.setState({redirect: true});
+          });   
+        })
+        return true;
+      } else {
+        this.setState({error: true, errorMsg: res.data.message})
+        return false
+      }
     })
+    
   }
 
 
   render() {
+    const {AddOrEditQuiz} = this.state;
     if(this.state.redirect){
       // Finish creating questions, redirecting to hosting page
-      return <Redirect to={`host/${this.state.gamePIN}`} />
+      return <Redirect to={{
+        pathname:`/host/${this.state.gamePIN}`,
+        state: {quizsetID: this.props.location.state.id}
+      }} />
+    }
+
+   
+    const EditQuestion = () => {
+      if (AddOrEditQuiz) {
+        return <EditQuestionForm quizsetID={this.state.quizsetID} setQuizSet={this.setQuizSet} setQuizId={this.setQuizId} id={this.state.currentQuizId} quiz={this.state.currentQuiz}
+        hiddenOrShowEditQuizForm={this.hiddenOrShowEditQuizForm}/>
+      } 
     }
     return (
       <ResponsiveContainer>
         <Form onSubmit={this.handleSubmit}>
           <Grid columns={4} divided style={{height: 60}}>
             <Grid.Row centered verticalAlign="middle">
-              <Grid.Column textAlign="center" width={2}><Header as='h2'>QuizSet</Header></Grid.Column>
+              <Grid.Column textAlign="center" width={4}><Header as='h2'>{this.state.name}</Header></Grid.Column>
             <Grid.Column width={4}>
             <Input
                 fluid
-                label="Quizset Name"
+                label="Name"
                 placeholder='Add name for Quizset'
                 value={this.state.name}
                 onChange={e => this.setState({name: e.target.value})}/>
             </Grid.Column>
-            <Grid.Column width={7}>
+            <Grid.Column width={5}>
             <Dropdown
               placeholder='Choose the tag'
               fluid
@@ -179,34 +258,50 @@ class CreateQuizsetPage extends Component {
               options={tagOptions}
               value={this.state.tag}
               onChange={(e,{value}) => 
-              { console.log(value)
-                this.setState({tag: value})}} 
+              { this.setState({tag: value})}} 
             />
 
                 </Grid.Column>
-              <Grid.Column textAlign="center" width={2}><Button primary type="button" name="save" onClick={()=>{this.saveQuizset()}}>Save Quizset</Button></Grid.Column>
+              {/* <Grid.Column textAlign="center" width={2}><Button primary type="button" name="save" onClick={()=>{this.saveQuizset()}}>Update</Button></Grid.Column> */}
               </Grid.Row>
           </Grid>
           
         <Segment>
-          <Grid columns={2} divided style={{height: 750}}>
+          <Grid columns={2} divided style={{height: 800}}>
             <Grid.Row>
               <Grid.Column width={4} stretched>
                 <Grid columns={1} >
                   <Grid.Row style={{height: 600}}>
                     <Grid.Column width={16} style={{height: 600, overflow:'auto'}}>
-                      <ListFloated quizset={this.state.quizset} quizsetID={this.state.quizsetID} setQuizSet={this.setQuizSet} setQuizId={this.setQuizId} id={this.state.currentQuizId}/>
+                      <ListFloated hiddenOrShowEditQuizForm={this.hiddenOrShowEditQuizForm} quizset={this.state.quizset} quizsetID={this.state.quizsetID} setQuizSet={this.setQuizSet} setQuizId={this.setQuizId} id={this.state.currentQuizId}/>
                     </Grid.Column>
                   </Grid.Row>
                   <Grid.Row textAlign='center'>
+                  
                     <Grid.Column>
+                    
                       <Button fluid size='large' type="button" onClick={()=>{this.addQuestion("")}}>Add Question</Button>
+                      <Button fluid  size='large' style={{marginTop: '1em'}} type="button" onClick={()=>{this.handleSave()}} >
+                          Save This Quiz
+                        </Button>
+                        <Confirm
+                          open={this.state.saved}
+                          content={this.state.savedMsg}
+                          onCancel={()=>{this.setState({saved: false, savedMsg: ""})}}
+                          onConfirm={()=>{this.setState({saved: false, savedMsg: ""})}}
+                        />
                       {/* <Link to={`/host/${this.gamePIN}`}> */}
                         <Button fluid primary size='large' style={{marginTop: '1em'}} type="submit">
-                          Finish
+                          Host This Quiz
                         </Button>
+                        <Confirm
+                          open={this.state.error}
+                          content={this.state.errorMsg}
+                          onCancel={()=>{this.setState({error: false, errorMsg: ""})}}
+                          onConfirm={()=>{this.setState({error: false, errorMsg: ""})}}
+                        />
                       {/* </Link> */}
-                      
+                     
                     </Grid.Column> 
                   </Grid.Row>
                 </Grid>
@@ -216,7 +311,7 @@ class CreateQuizsetPage extends Component {
                 <Grid textAlign='center'>
                   <Grid.Row>
                     <Grid.Column>
-                      <EditQuestionForm quizsetID={this.state.quizsetID} setQuizSet={this.setQuizSet} setQuizId={this.setQuizId} id={this.state.currentQuizId} quiz={this.state.currentQuiz}/>
+                      {EditQuestion()}
                     </Grid.Column>
                   </Grid.Row>
                  
@@ -268,8 +363,9 @@ class ListFloated extends React.Component {
       this.props.setQuizSet(res.data.quizset)
       })
       
-      if(this.state.currentQuizId == deleteId) {
+      if(this.state.currentQuizId === deleteId) {
         this.props.setQuizId("")
+        this.props.hiddenOrShowEditQuizForm(false)
       }
   }
 
@@ -283,7 +379,7 @@ class ListFloated extends React.Component {
         </List.Content>
         <Icon name='help' />
         <List.Content verticalAlign='middle'>
-      <List.Header><a onClick={()=>{this.props.setQuizId(element._id)}}>Question {index}</a></List.Header>
+      <List.Header onClick={()=>{this.props.setQuizId(element._id)}}>Question {index}</List.Header>
           <List.Description>
             {element.content}
           </List.Description>
@@ -313,7 +409,7 @@ class EditQuestionForm extends React.Component {
         quizsetID: 0,
         // quizsetID: 
         content: "",
-        // picture: "",
+        picture: "",
         option1: "",
         option2: "",
         option3: "",
@@ -321,9 +417,17 @@ class EditQuestionForm extends React.Component {
         answer: "",
         time: null,
         gamePIN: "",
-        id: ""
+        id: "",
+        image:"",
+        filename:"Upload image from your computer",
+        error: false,
+        errorMsg: ""
     }
+
+    this.validateQuiz = this.validateQuiz.bind(this);
     this.saveQuestion = this.saveQuestion.bind(this);
+    this.uploadFiles = this.uploadFiles.bind(this);
+    this.removeImage = this.removeImage.bind(this);
   }
 
   componentWillReceiveProps(props) {
@@ -336,37 +440,119 @@ class EditQuestionForm extends React.Component {
     this.setState({ option4:props.quiz.option4})
     this.setState({ answer:props.quiz.answer})
     this.setState({ time:props.quiz.time})
-    // console.log("my answer " + props.quiz.answer)
-
     this.setState({ quizsetID: props.quizsetID })
-    // this.setState({ quizsetID: props.quizsetID })
+    this.setState({picture:props.quiz.picture})
   }
 
   // componentDidMount() {
   //   this.getQuestionById();
   // }
 
-  
+  validateQuiz() {
+    
+    const {content, option1, option2, option3, option4, answer, time} = this.state
+    if (content == null || content === "") {
+      this.setState({errorMsg: "Please input the question!"});
+      this.setState({error: true});
+      return true;
+    }
+
+    if (time == null || time === 0) {
+      this.setState({errorMsg: "Please input the time!"});
+      this.setState({error: true});
+      return true;
+    }
+    if (option1 == null || option1 === "" || option2 == null || option2 === ""
+    || option3 == null || option3 === "" || option4 == null || option4 === "") {
+      this.setState({errorMsg: "Please input four options!"});
+      this.setState({error: true});
+      return true;
+    }
+    if (answer == null || answer === "") {
+      this.setState({errorMsg: "Please input the correct answer!"});
+      this.setState({error: true});
+      return true;
+    }
+
+   
+    
+    return false;
+  }
+
+  uploadFiles(){
+    if (this.state.image !== "") {
+      const formData = new FormData()
+      formData.append('image', this.state.image)
+      axios.post("http://localhost:4001/quizset/upload_image", formData, {
+      }).then(res => {
+          this.setState({uploading: false, picture: res.data.image.filename})
+          console.log(res)
+      })
+    }
+  }
+
+  removeImage() {
+    this.setState({filename: "Upload image from your computer", image:"", picture:""})
+  }
+
+  onChange = e => {
+    const file = e.target.files[0].name
+    this.setState({ filename: file, image: e.target.files[0]})
+  }
+
 
   saveQuestion() {
+    
     console.log("QUIZSET", this.state.quizsetID)
     // console.log("game pin " + this.state.gamePIN)
     console.log("game answer " + this.state.answer)
     // POST to express API to add a new game session to the DB collection
-    axios.post('http://localhost:4001/quizset/add-question', {
+    axios.post('http://localhost:4001/quizset/update-question', {
       question: this.state, quizsetID: this.state.quizsetID
     }).then(res => {
-      // console.log(res);
-      // console.log(res.data);
-      // console.log(res.data.quizset)
-      // console.log(res.data.id)
       this.props.setQuizSet(res.data.quizset)
       this.props.setQuizId(res.data.id)
       this.setState({id: res.data.id})
+      this.props.hiddenOrShowEditQuizForm(false)
       })
   }
  
   render() {
+    const{uploading, filename, picture} = this.state;
+  const content = () => {
+    switch(true) {
+      case uploading:
+        return  <Segment placeholder size='large'>
+                <Dimmer active inverted>
+                  <Loader inverted>Loading</Loader>
+                </Dimmer>
+              </Segment>
+      case picture != null && picture !== "":
+        return  <Segment placeholder size='large' >
+                <Image centered src={picture} size="medium"/>
+                               <Segment.Inline> 
+                                 <Button type="button" id="file" primary onClick={this.removeImage}>Remove Image</Button>
+                              </Segment.Inline>
+                </Segment>
+      default:
+        return   <Segment placeholder size='large'><Header icon>
+                         <Icon name='file image outline' />
+                         {filename}
+                       </Header>
+                       <Segment.Inline> 
+                       <label for="file" class="ui icon button">
+                           <i class="file icon"></i>
+                           Open File</label>
+                       <input type="file" id="file" name="file" hidden onChange={this.onChange}/>
+                       
+                       <Button type="button" id="file" primary onClick={this.uploadFiles}>Upload File</Button>
+                       </Segment.Inline>
+                       
+                       </Segment>
+                      
+                       
+    }
+  }
   return <Form size='massive'>
     <Grid>
       <Grid.Row>
@@ -392,16 +578,7 @@ class EditQuestionForm extends React.Component {
       <Grid.Row centered verticalAlign='center' style={{height: 270}}>
         
         <Grid.Column width={14}>
-          <Segment placeholder size='large'>
-            <Header icon>
-              <Icon name='file image outline' />
-              Upload image from your computer
-            </Header>
-            <Segment.Inline>
-              <Button primary>Upload Image</Button>
-              <Button>Youtube Link</Button>
-            </Segment.Inline>
-          </Segment>
+          {content()}
         </Grid.Column>
       </Grid.Row>
       <Grid.Row columns={2}>
@@ -432,7 +609,7 @@ class EditQuestionForm extends React.Component {
               fluid
               icon='square outline'
               iconPosition='left'
-              placeholder='Add Answer 3 (Optional)'
+              placeholder='Add Answer 3'
               value={this.state.option3}
               onChange={e => this.setState({option3: e.target.value})}
           />
@@ -441,7 +618,7 @@ class EditQuestionForm extends React.Component {
           <Form.Input
               icon='circle outline'
               iconPosition='left'
-              placeholder='Add Answer 4 (Optional)'
+              placeholder='Add Answer 4'
               value={this.state.option4}
               onChange={e => this.setState({option4: e.target.value})}
           />
@@ -457,7 +634,13 @@ class EditQuestionForm extends React.Component {
           </Menu>
       </Grid.Column>
             <Grid.Column width={4}>
-            <Button type="button" size='large' color='red' onClick={()=>{this.saveQuestion()}}>Save Question</Button>
+            <Button type="button" size='large' color='red' onClick={()=>{if (!this.validateQuiz()) this.saveQuestion()}}>Save Question</Button>
+            <Confirm
+              open={this.state.error}
+              content={this.state.errorMsg}
+              onCancel={()=>{this.setState({error: false, errorMsg: ""})}}
+              onConfirm={()=>{this.setState({error: false, errorMsg: ""})}}
+            />
             </Grid.Column>
        </Grid.Row>
          

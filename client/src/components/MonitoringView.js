@@ -122,12 +122,15 @@ class MonitoringView extends Component {
     }));
 
     // Reset answer stats
-    this.state.answerStatistic[0].value = 0;
-    this.state.answerStatistic[1].value = 0;
-    this.state.answerStatistic[2].value = 0;
-    this.state.answerStatistic[3].value = 0;
+    this.setState({
+      answerStatistic: [
+        { name: 'A', value: 0 },
+        { name: 'B', value: 0 },
+        { name: 'C', value: 0 },
+        { name: 'D', value: 0 },
+      ]
+    })
 
-    
     event.preventDefault();
   }
 
@@ -147,13 +150,14 @@ class MonitoringView extends Component {
       () => this.tick(),
       1000
     );
-    this.props.socket.on("notify host", (info) => {
-      this.state.answerStatistic[info.choice-1].value += 1;
-    })
-
+    
     // Listen to players' submissions of choices
     this.props.socket.on("notify host", (info) => {
-      this.state.answerStatistic[info.choice-1].value += 1;
+      var newAnswerStatistic = this.state.answerStatistic;
+      newAnswerStatistic[info.choice -1 ].value += 1;
+      this.setState({
+        answerStatistic: newAnswerStatistic
+      })
     })
 
     // Listen to the backend to transmit stats for the
@@ -207,7 +211,7 @@ class MonitoringView extends Component {
               {this.state.showAnswer
                 ?
                   (
-                    this.state.quizNo == (this.props.quizset.length - 1)
+                    this.state.quizNo === (this.props.quizset.length - 1)
                     ?
                       <Button color='teal' onClick={this.showResult}>
                         Show Result
@@ -239,28 +243,28 @@ class MonitoringView extends Component {
                 color='orange'
                 icon='star outline'
                 content={quiz.option1}
-                correct={quiz.answer == '1'}
+                correct={quiz.answer === '1'}
                 data={this.state.answerStatistic[0].value}
               />
               <OptionStatistic
                 color='yellow'
                 icon='heart outline'
                 content={quiz.option2}
-                correct={quiz.answer == '2'}
+                correct={quiz.answer === '2'}
                 data={this.state.answerStatistic[1].value}
               />
               <OptionStatistic
                 color='blue'
                 icon='square outline'
                 content={quiz.option3}
-                correct={quiz.answer == '3'}
+                correct={quiz.answer === '3'}
                 data={this.state.answerStatistic[2].value}
               />
               <OptionStatistic
                 color='teal'
                 icon='circle outline'
                 content={quiz.option4}
-                correct={quiz.answer == '4'}
+                correct={quiz.answer === '4'}
                 data={this.state.answerStatistic[3].value}
               />
               

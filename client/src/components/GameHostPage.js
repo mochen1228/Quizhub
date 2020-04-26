@@ -3,7 +3,6 @@ import socketIOClient from "socket.io-client"
 import ResponsiveContainer from './ResponsiveContainer'
 import LobbyView from './LobbyView'
 import MonitoringView from './MonitoringView'
-import ResultView from './ResultView'
 import axios from "axios"
 import DetailedResultView from './DetailedResultView'
 
@@ -12,11 +11,11 @@ class GameHostPage extends Component {
     super();
     this.state = {
       socket: socketIOClient("localhost:4001"),
-      quizsetName: "quizset Name",
+      quizsetName: undefined,
       quizset: [],
       view: "lobby",
       gamePIN: "",
-      quizsetID: 1,
+      quizsetID: "",
       overallStats: undefined
     };
     this.handleViewChange = this.handleViewChange.bind(this);
@@ -25,14 +24,28 @@ class GameHostPage extends Component {
   }
 
   componentDidMount() {
+    if (this.state.quizsetName === undefined) {
+      // send enter game signal
+      this.state.socket.emit('enter game', this.props.match.params.id);
+    }
+    // wait for quizname
+    this.state.socket.on("enter game" + this.props.match.params.id, (quizname)=>{
+      console.log(quizname);
+      this.setState({quizsetName: quizname});
+    })
     // wait for the game start signal
-    console.log(this.props.match.params.id);
+    this.setState({quizsetID: this.props.location.state.quizsetID})
     this.state.socket.on("start game" + this.props.match.params.id, (quizset)=>{
       console.log(quizset);
-      this.setState({quizset: quizset});
+      this.setState({
+        quizset: quizset,
+        answerSet: new Array(quizset.length)
+      });
+      this.setState({gamePIN: this.props.match.params.id})
       this.handleViewChange('monitor');
       // this.createNewSession();
     })
+
   }
 
   createNewSession() {
@@ -58,6 +71,7 @@ class GameHostPage extends Component {
 
 
   render() {
+    console.log(this.state.quizset);
     switch(this.state.view) {
       case 'lobby':
         // show all the player joining the game
@@ -87,17 +101,25 @@ class GameHostPage extends Component {
           </ResponsiveContainer>
         );
       case 'result':
+        // Save the stats to the database
+        console.log("stats:", this.state.overallStats)
+        console.log("pin:", this.state.gamePIN)
+
+        axios.post('http://localhost:4001/session/save-history', {
+          gamePIN: this.state.gamePIN,
+          stats: this.state.overallStats
+        }).then(res => {
+        })
+
         return (
           <ResponsiveContainer>
-            {/* <ResultView
-              stats={this.state.overallStats}
-              quizset={this.state.quizset}
-              gamePIN={this.state.gamePIN}
-            /> */}
             <DetailedResultView
+              isHost={true}
               stats={this.state.overallStats}
               quizset={this.state.quizset}
               gamePIN={this.state.gamePIN}
+              quizsetID={this.state.quizsetID}
+              answerSet={this.state.answerSet}
             />
           </ResponsiveContainer>
         );

@@ -56,8 +56,6 @@ router.post('/add-session', (req, res) => {
   })
 })
 
-
-
 router.get('/get-tags', (req, res)=>{
   QuizsetTag.find({}, (err, doc)=>{
     console.log("tags " + doc)

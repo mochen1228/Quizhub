@@ -2,7 +2,6 @@
   "name": "client",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:4001",
   "dependencies": {
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
@@ -16,6 +15,7 @@
     "semantic-ui-react": "^0.88.2",
     "socket.io-client": "^2.3.0"
   },
+  "proxy": "http://localhost:4001",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

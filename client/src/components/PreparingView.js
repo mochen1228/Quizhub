@@ -61,7 +61,7 @@ class PreparingView extends Component {
           <Grid.Column textAlign='center' width={8}>
             <Statistic color='teal'>
               <Statistic.Label>Ready</Statistic.Label>
-              {this.state.timer == 0
+              {this.state.timer === 0
                 ? <Statistic.Value>Go</Statistic.Value>
                 : <Statistic.Value>{this.state.timer}</Statistic.Value>
               }

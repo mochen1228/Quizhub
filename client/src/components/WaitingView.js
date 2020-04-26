@@ -9,7 +9,7 @@ import {
  * Show the waiting page. Waiting for instruction.
  * Props:
  * changeView: the state lifting up handler to change view of the parent component
- * ifSelected: if player has submit his/her answer
+ * ifAnswered: if player has submit his/her answer
  */
 class WaitingView extends Component {
   
@@ -20,7 +20,7 @@ class WaitingView extends Component {
           <Grid.Column textAlign='center' width={12}>
             <Loader active inline='centered' size='big'/>
             <Header as='h1' icon color='teal'>
-              {this.props.ifSelected
+              {this.props.ifAnswered
                 ? "Answer Submitted!"
                 : "Time's up!"
               }

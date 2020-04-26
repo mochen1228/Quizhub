@@ -6,8 +6,10 @@ import {
   Statistic,
   Button,
   Icon,
-  List
+  List,
 } from 'semantic-ui-react'
+import { Redirect } from 'react-router-dom'
+
 
 /**
  * Show all the players in the lobby with certain game PIN.
@@ -23,10 +25,16 @@ class LobbyView extends Component {
     super(props);
     this.state = {
       playerList: [],
+      redirect: false,
     };
     this.updatePlayerList = this.updatePlayerList.bind(this);
     this.startGame = this.startGame.bind(this);
     this.leaveGame = this.leaveGame.bind(this);
+    this.handleWindowClose = this.handleWindowClose.bind(this);
+    // window.addEventListener("beforeunload", (ev) => {  
+    //   ev.preventDefault();
+    //   return this.handleWindowClose();
+    // });
   }
 
   // update player playerNumber
@@ -37,6 +45,16 @@ class LobbyView extends Component {
     })
   }
 
+  // Execute when user closes the browser tab
+  // Notify backend that the user is leaving
+  handleWindowClose() {
+    console.log("leave game pin " + this.props.gamePin);
+    this.props.socket.emit('player leave', {
+      gamePIN: this.props.gamePin,
+      nickname: this.props.nickname
+    })
+  }
+
   // host send start game signal to back end
   startGame(event) {
     console.log("start game pin " + this.props.gamePin);
@@ -44,25 +62,56 @@ class LobbyView extends Component {
     event.preventDefault();
   }
 
-  // player send leave game signal to back end
+  // Client send leave game signal to back-end
+  // If player is disconnecting, remove player
+  // If host is disconnecting, remove game session and redirect all players
   leaveGame(event) {
-    console.log("leave game pin " + this.props.gamePin);
-    event.preventDefault();
-  }
+    console.log("Leaving game pin " + this.props.gamePin);
+    if (this.props.isHost) {
+      this.props.socket.emit('host leave', {
+        gamePIN: this.props.gamePin
+      })
+    } else {
+      this.props.socket.emit('player leave', {
+        gamePIN: this.props.gamePin,
+        nickname: this.props.nickname
+      })
+    }
 
+    event.preventDefault();
+    this.setState({redirect: true});
+
+    
+  }
+ 
   componentDidMount() {
     // get player list before mount
     this.props.socket.emit('get player list', this.props.gamePin);
-    
     // wait for player list update
     this.props.socket.on('update player list' + this.props.gamePin, (playerList) => {
       this.updatePlayerList(playerList);
     })
+
+    console.log("socket on for: ", "host left" + this.props.gamePin)
+    this.props.socket.on("host left" + this.props.gamePin, (info)=> {
+      console.log("Host has left")
+      this.setState( {
+        redirect: true
+      })
+    })
   }
 
   render() {
+    // Handles player leaving the page
+    if(this.state.redirect){
+      console.log("Redirecting")
+
+      return <Redirect to={{
+        pathname:`/`,
+      }} />
+    }
     return (
-      <Segment style={{height: '95vh'}}>
+      <Segment style={{height: '90vh'}}>
         <Grid centered>
           <Grid.Row verticalAlign='middle' style={{height: '10vh'}}>
             <Grid.Column width={2} textAlign='center'>
@@ -79,24 +128,16 @@ class LobbyView extends Component {
                 </Header.Subheader>
               </Header>
             </Grid.Column>
+
             <Grid.Column textAlign='right' width={2}>
-              {this.props.isHost
-                ?
-                  <Button color='teal' animated='fade' onClick={this.startGame}>
-                    <Button.Content visible>Start</Button.Content>
-                    <Button.Content hidden>
-                      <Icon name='arrow right' />
-                    </Button.Content>
-                  </Button>
-                :
                   <Button color='teal' animated='fade' onClick={this.leaveGame}>
                     <Button.Content visible>Leave</Button.Content>
                     <Button.Content hidden>
                       <Icon name='arrow right' />
                     </Button.Content>
                   </Button>
-              }
             </Grid.Column>
+
           </Grid.Row>
 
           <Grid.Row centered style={{height: '20vh'}} verticalAlign='middle'>
@@ -119,9 +160,9 @@ class LobbyView extends Component {
             </Grid.Column>
           </Grid.Row>
           
-          <Grid.Row style={{height: '65vh'}}>
+          <Grid.Row style={{height: '50vh'}}>
             <Grid.Column>
-              <Segment size='large' style={{height: 450}}>
+              <Segment size='large' style={{height: '50vh'}}>
                 <List 
                     items={this.state.playerList}
                     size='large'
@@ -129,6 +170,27 @@ class LobbyView extends Component {
               </Segment>
             </Grid.Column>
           </Grid.Row>
+
+          {this.props.isHost
+            ?
+            <Grid.Row centered style={{height: '10vh'}}>
+
+              <Grid.Column centered textAlign='middle' width={5}>
+                    <Button color='teal' animated='fade' onClick={this.startGame}>
+                      <Button.Content visible>Start Game!</Button.Content>
+                      <Button.Content hidden>
+                        <Icon name='arrow right' />
+                      </Button.Content>
+                    </Button>
+              </Grid.Column>
+
+            </Grid.Row>
+            :
+            <Grid.Row style={{height: '10vh'}}></Grid.Row>
+          }
+          
+          
+          
         </Grid>
       </Segment>
     );

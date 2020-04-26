@@ -1,4 +1,6 @@
 import React, { Component } from 'react'
+import { Redirect} from 'react-router-dom'
+
 import socketIOClient from "socket.io-client"
 import ResponsiveContainer from './ResponsiveContainer'
 import PreparingView from './PreparingView'
@@ -6,25 +8,29 @@ import QuestionView from './QuestionView'
 import WaitingView from './WaitingView'
 import AnswerView from './AnswerView'
 import LobbyView from './LobbyView'
-import ResultView from './ResultView'
+import DetailedResultView from './DetailedResultView'
 
-  
+
 class GamePlayPage extends Component {
   constructor(props) {
     super(props);
     this.state = {
       // Unique ID for each player. For now, it is the user's nickname
       playerID: "",
+      // nickname:"",
       socket: socketIOClient("localhost:4001"),
-      quizsetName: "Quiz Name",
+      quizsetName: undefined,
       quizNo: 0,
-      gamePIN: 0,
       quizset: undefined,
+      answerSet: undefined,
+      quizsetID: "",
       view: "lobby",
-      ifSelected: false, // if player finish answering
+      ifAnswered: false, // if player finish answering
       playerAnswer: undefined, // player selected answer
+      score: 0,
       answerStatistic: undefined,
-      overallStatistic: undefined
+      overallStatistic: undefined,
+      redirect: false
     };
 
     this.handleViewChange = this.handleViewChange.bind(this);
@@ -32,10 +38,22 @@ class GamePlayPage extends Component {
   }
 
   componentDidMount() {
-    this.state.gamePIN = this.props.match.params.id
+    if (this.state.quizsetName === undefined) {
+      // send enter game signal
+      this.state.socket.emit('enter game', this.props.match.params.id);
+    }
+    // wait for quizname
+    this.state.socket.on("enter game" + this.props.match.params.id, (quizname)=>{
+      console.log(quizname);
+      this.setState({quizsetName: quizname});
+    })
     // Wait for the game start signal
     this.state.socket.on("start game" + this.props.match.params.id, (quizset)=>{
-      this.setState({quizset: quizset});
+      this.setState(
+        {
+          quizset: quizset,
+          answerSet: new Array(quizset.length)
+        });
       this.handleViewChange('prepare');
     })
     // Wait for the show answer signal
@@ -43,11 +61,12 @@ class GamePlayPage extends Component {
       this.setState({answerStatistic: answerStatistic});
       this.handleViewChange('answer');
     })
+    
     // wait for the next quiz signal
     this.state.socket.on("next quiz" + this.props.match.params.id, (quizNo)=>{
       this.setState({
         quizNo: quizNo,
-        ifSelected: false,
+        ifAnswered: false,
         playerAnswer: undefined,
         answerStatistic: undefined,
       });
@@ -70,20 +89,26 @@ class GamePlayPage extends Component {
     this.setState({
       view: newView
     });
-    console.log("show answer" + this.props.match.params.id)
   }
 
   // Record player's answer and notify the backend
   handlePlayerChoice(answer) {
     console.log(answer)
+    var newAnswerSet = this.state.answerSet;
+    newAnswerSet[this.state.quizNo] = answer
+    var newScore = this.state.score + (answer === this.state.quizset[this.state.quizNo].answer ? 1 : 0)
     this.setState({
-      ifSelected: true,
+      ifAnswered: true,
       playerAnswer: answer,
+      answerSet: newAnswerSet,
+      score: newScore
+      // NOTE:
+      // To finish debugging for submitting answers, uncomment this:
       // view: 'wait'
     });
     // TODO: emit player's answer to backend
     this.state.socket.emit('submit answer', {
-      gamePIN: this.state.gamePIN,
+      gamePIN: this.props.match.params.id,
       choice: answer
     });
   }
@@ -91,6 +116,15 @@ class GamePlayPage extends Component {
   
 
   render() {
+    // Handles host leaving the page
+    if(this.state.redirect){
+      console.log("Redirecting")
+
+      return <Redirect to={{
+        pathname:`/`,
+      }} />
+    }
+
     switch(this.state.view) {
       case 'lobby':
         // show all the player joining the game
@@ -102,6 +136,7 @@ class GamePlayPage extends Component {
               gamePin={this.props.match.params.id}
               isHost={false}
               changeView={this.handleViewChange}
+              nickname={this.props.location.state.nickname}
             />
           </ResponsiveContainer>
         )
@@ -135,7 +170,7 @@ class GamePlayPage extends Component {
         return (
           <ResponsiveContainer>
             <WaitingView
-              ifSelected={this.state.ifSelected}
+              ifAnswered={this.state.ifAnswered}
               changeView={this.handleViewChange}
             />
           </ResponsiveContainer>
@@ -157,9 +192,14 @@ class GamePlayPage extends Component {
       case 'result':
         return (
           <ResponsiveContainer>
-            <ResultView
+            <DetailedResultView
+              isHost={false}
               stats={this.state.overallStatistic}
               quizset={this.state.quizset}
+              gamePIN={this.props.match.params.id}
+              quizsetID={this.state.quizsetID}
+              score={this.state.score}
+              answerSet={this.state.answerSet}
             /> 
           </ResponsiveContainer>
         );

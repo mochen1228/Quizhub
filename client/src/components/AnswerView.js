@@ -3,7 +3,6 @@ import {
     Grid,
     Segment,
     Header,
-    Button,
     Icon,
     Label
 } from 'semantic-ui-react'
@@ -61,7 +60,7 @@ class AnswerView extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      ifCorrect: this.props.playerAnswer == 
+      ifCorrect: this.props.playerAnswer === 
                   this.props.quizset[this.props.quizNo].answer
     };
   }
@@ -101,8 +100,8 @@ class AnswerView extends Component {
                 color='orange'
                 icon='star outline'
                 content={quiz.option1}
-                correct={quiz.answer == '1'}
-                selected={this.props.playerAnswer == "1"}
+                correct={quiz.answer === '1'}
+                selected={this.props.playerAnswer === "1"}
               />
             </Grid.Column>
             <Grid.Column>
@@ -110,8 +109,8 @@ class AnswerView extends Component {
                 color='yellow'
                 icon='heart outline'
                 content={quiz.option2}
-                correct={quiz.answer == '2'}
-                selected={this.props.playerAnswer == "2"}
+                correct={quiz.answer === '2'}
+                selected={this.props.playerAnswer === "2"}
               />
             </Grid.Column>
           </Grid.Row>
@@ -121,8 +120,8 @@ class AnswerView extends Component {
                 color='blue'
                 icon='square outline'
                 content={quiz.option3}
-                correct={quiz.answer == '3'}
-                selected={this.props.playerAnswer == "3"}
+                correct={quiz.answer === '3'}
+                selected={this.props.playerAnswer === "3"}
               />
             </Grid.Column>
             <Grid.Column>
@@ -130,8 +129,8 @@ class AnswerView extends Component {
                 color='teal'
                 icon='circle outline'
                 content={quiz.option4}
-                correct={quiz.answer == '4'}
-                selected={this.props.playerAnswer == "4"}
+                correct={quiz.answer === '4'}
+                selected={this.props.playerAnswer === "4"}
               />
             </Grid.Column>
           </Grid.Row>

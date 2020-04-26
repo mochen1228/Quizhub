@@ -12,10 +12,10 @@ const SessionSchema = mongoose.Schema({
     }
 })
 
-// Picture model
-var PictureSchema = new mongoose.Schema({
-  img: { data: Buffer, contentType: String }
-});
+// // Picture model
+// var PictureSchema = new mongoose.Schema({
+//   name: String
+// });
 
 // User model
 var UserSchema = new mongoose.Schema({
@@ -33,7 +33,7 @@ var UserSchema = new mongoose.Schema({
 // Quiz model
 var QuizSchema = new mongoose.Schema({
     content: String,
-    // picture: {type: [PictureSchema]},
+    picture: String,
     // 4 options for player
     option1: String,
     option2: String,
@@ -92,16 +92,36 @@ var RecordSchema = new mongoose.Schema({
   update: {type: Date, default: Date.now}
 });
 
+// AnswerStatistics is equal to overallStats in GameHostPage
+/*
+"answerStatistics" : { 
+  "0" : [ { "name" : "A", "value" : 0 }, 
+          { "name" : "B", "value" : 0 }, 
+          { "name" : "C", "value" : 0 }, 
+          { "name" : "D", "value" : 0 } ], 
+  "1" : [ { "name" : "A", "value" : 0 }, 
+          { "name" : "B", "value" : 0 }, 
+          { "name" : "C", "value" : 0 }, 
+          { "name" : "D", "value" : 0 } ], 
+}
+*/
+
+var SessionHistorySchema = new mongoose.Schema({
+  gamePIN: Number,
+  answerStatistics: Object
+});
 
 var Session = mongoose.model("Sessions", SessionSchema)
 var Quiz = mongoose.model("Quiz", QuizSchema)
-mongoose.model('Picture', PictureSchema);
+// mongoose.model('Picture', PictureSchema);
 mongoose.model('Record', RecordSchema);
 var Player = mongoose.model('Player', PlayerSchema);
 var QuizsetTag = mongoose.model('QuizsetTag', TagSchema);
 var Game = mongoose.model('Game', GameSchema);
 var Quizset = mongoose.model('Quizset', QuizsetSchema);
 var User = mongoose.model('User', UserSchema);
+var History = mongoose.model('History', SessionHistorySchema);
+// var Picture = mongoose.model('Picture', PictureSchema);
 module.exports = {
-  Session, Quiz, Game, Quizset, QuizsetTag, Player, User
+  Session, Quiz, Game, Quizset, QuizsetTag, Player, User, History
 } 

@@ -1,9 +1,7 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
 import {
   Button,
-  Container,
   Icon,
   Menu,
   Responsive,
@@ -46,7 +44,7 @@ class DesktopContainer extends Component {
     render() {
       const { children} = this.props
       const activeItem = this.props.activeItem
-    if (this.state.loggedIn == true) {
+    if (this.state.loggedIn === true) {
       return <Responsive getWidth={getWidth} minWidth={Responsive.onlyTablet.minWidth}>
       <Visibility once={false}> <Menu
             fixed='top'
@@ -139,7 +137,8 @@ class DesktopContainer extends Component {
     render() {
       const { children} = this.props
       const { sidebarOpened } = this.state
-      if (this.state.loggedIn == true) {
+      const activeItem = this.props.activeItem
+      if (this.state.loggedIn === true) {
 
         return  <Responsive
         as={Sidebar.Pushable}
@@ -154,10 +153,27 @@ class DesktopContainer extends Component {
           vertical
           visible={sidebarOpened}
         >
-          <Menu.Item as='a' active>
+          {/* <Menu.Item as='a' active>
             Quizhub
           </Menu.Item>
-          <Menu.Item as='a'>Explore</Menu.Item>
+          <Menu.Item as='a'>Explore</Menu.Item> */}
+          <Menu.Item
+            as='a'
+            href='/'
+            name='home'
+            active={activeItem === 'home'}
+          >
+            <Icon name='question circle outline' size='large' />
+            Quizhub
+          </Menu.Item>
+          <Menu.Item
+            as='a'
+            href='/explore'
+            name='explore'
+            active={activeItem === 'explore'}
+          >
+            Explore
+          </Menu.Item>
         </Sidebar>
 
         <Sidebar.Pusher dimmed={sidebarOpened}>
@@ -190,10 +206,27 @@ class DesktopContainer extends Component {
             vertical
             visible={sidebarOpened}
           >
-            <Menu.Item as='a' active>
+            {/* <Menu.Item as='a' active>
               Quizhub
             </Menu.Item>
-            <Menu.Item as='a'>Explore</Menu.Item>
+            <Menu.Item as='a'>Explore</Menu.Item> */}
+            <Menu.Item
+              as='a'
+              href='/'
+              name='home'
+              active={activeItem === 'home'}
+            >
+              <Icon name='question circle outline' size='large' />
+              Quizhub
+            </Menu.Item>
+            <Menu.Item
+              as='a'
+              href='/explore'
+              name='explore'
+              active={activeItem === 'explore'}
+            >
+              Explore
+            </Menu.Item>
           </Sidebar>
   
           <Sidebar.Pusher dimmed={sidebarOpened}>
