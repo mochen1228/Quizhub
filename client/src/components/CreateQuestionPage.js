@@ -41,7 +41,7 @@ class CreateQuizsetPage extends Component {
   constructor() {
     super();
     this.state = {
-      endpoint: "https://guarded-gorge-11703.herokuapp.com/",
+      endpoint: "localhost:4001",
       quizsetID: "",
       gamePIN: 0,
       players: [],
@@ -75,7 +75,7 @@ class CreateQuizsetPage extends Component {
   }
 
   addQuestion(id) {
-    axios.post('https://guarded-gorge-11703.herokuapp.com/quizset/add-question', {
+    axios.post('http://localhost:4001/quizset/add-question', {
       quizsetID: this.state.quizsetID
     }).then(res => {
       this.setQuizSet(res.data.quizset)
@@ -99,7 +99,7 @@ class CreateQuizsetPage extends Component {
     console.log("Incoming ID", this.props.location.state.id)
     // Loads quizset to the page
     // POST to express API to add a new game session to the DB collection
-    axios.post('https://guarded-gorge-11703.herokuapp.com/quizset/get-quiz-set', {
+    axios.post('http://localhost:4001/quizset/get-quiz-set', {
       quizsetID: this.props.location.state.id
     }).then(res => {
       
@@ -121,7 +121,7 @@ class CreateQuizsetPage extends Component {
     if (quizId == "") return
     console.log("getQuestionById id = " + quizId)
 
-    axios.post('https://guarded-gorge-11703.herokuapp.com/quizset/get-quiz', {
+    axios.post('http://localhost:4001/quizset/get-quiz', {
       id: quizId
     }).then(res => {
       // console.log(res);
@@ -179,7 +179,7 @@ class CreateQuizsetPage extends Component {
     } 
 
     // POST to express API to add a new game session to the DB collection
-    axios.post('https://guarded-gorge-11703.herokuapp.com/quizset/update-quizset', {
+    axios.post('http://localhost:4001/quizset/update-quizset', {
       quizsetID:this.state.quizsetID, name:this.state.name, tag: this.state.tag
     }).then(res => {
       
@@ -193,12 +193,12 @@ class CreateQuizsetPage extends Component {
     if (!this.saveQuizset()) {
       return
     }
-    axios.post('https://guarded-gorge-11703.herokuapp.com/quizset/validate-quizset', {
+    axios.post('http://localhost:4001/quizset/validate-quizset', {
       quizsetID: this.state.quizsetID
     }).then(res => {
       if (res.data.result) {
         // Create new game session and redirect to the hosting page
-        axios.post('https://guarded-gorge-11703.herokuapp.com/session/create-new-session', {
+        axios.post('http://localhost:4001/session/create-new-session', {
           quizsetID: this.state.quizsetID
         }).then(res => {
           this.setState({gamePIN: res.data.gamePIN}, function() {
@@ -355,7 +355,7 @@ class ListFloated extends React.Component {
 
     // Delete a Question from a quizset, then refresh the left
     // question list
-    axios.post('https://guarded-gorge-11703.herokuapp.com/quizset/delete-question', {
+    axios.post('http://localhost:4001/quizset/delete-question', {
       id: deleteId, quizsetID: this.state.quizsetID
     }).then(res => {
       // console.log(res);
@@ -483,7 +483,7 @@ class EditQuestionForm extends React.Component {
     if (this.state.image !== "") {
       const formData = new FormData()
       formData.append('image', this.state.image)
-      axios.post("https://guarded-gorge-11703.herokuapp.com/quizset/upload_image", formData, {
+      axios.post("http://localhost:4001/quizset/upload_image", formData, {
       }).then(res => {
           this.setState({uploading: false, picture: res.data.image.filename})
           console.log(res)
@@ -507,7 +507,7 @@ class EditQuestionForm extends React.Component {
     // console.log("game pin " + this.state.gamePIN)
     console.log("game answer " + this.state.answer)
     // POST to express API to add a new game session to the DB collection
-    axios.post('https://guarded-gorge-11703.herokuapp.com/quizset/update-question', {
+    axios.post('http://localhost:4001/quizset/update-question', {
       question: this.state, quizsetID: this.state.quizsetID
     }).then(res => {
       this.props.setQuizSet(res.data.quizset)

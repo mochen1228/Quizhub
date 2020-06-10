@@ -18,7 +18,7 @@ class DetailedResultView extends Component {
     constructor(props) {
         super(props);
         this.state = {
-          endpoint: "https://guarded-gorge-11703.herokuapp.com/",
+          endpoint: "localhost:4001",
           // quizsetID: 1,
           gamePIN: this.props.gamePIN,
           // players: [],
@@ -48,7 +48,7 @@ class DetailedResultView extends Component {
     loadQuizSet() {
         // Loads quizset to the page
         // POST to express API to add a new game session to the DB collection
-        axios.post('https://guarded-gorge-11703.herokuapp.com/quizset/get-quiz-set', {
+        axios.post('http://localhost:4001/quizset/get-quiz-set', {
           quizsetID: this.props.quizsetID
         }).then(res => {
           // console.log(res);
@@ -62,7 +62,7 @@ class DetailedResultView extends Component {
     getQuestionById(quizId) {
         console.log("getQuestionById id = " + quizId)
     
-        axios.post('https://guarded-gorge-11703.herokuapp.com/quizset/get-quiz', {
+        axios.post('http://localhost:4001/quizset/get-quiz', {
           id: quizId
         }).then(res => {
           // console.log(res);

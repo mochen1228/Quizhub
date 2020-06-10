@@ -10,7 +10,7 @@ class GameHostPage extends Component {
   constructor() {
     super();
     this.state = {
-      socket: socketIOClient("https://guarded-gorge-11703.herokuapp.com/"),
+      socket: socketIOClient("localhost:4001"),
       quizsetName: undefined,
       quizset: [],
       view: "lobby",
@@ -49,7 +49,7 @@ class GameHostPage extends Component {
   }
 
   createNewSession() {
-    axios.post('https://guarded-gorge-11703.herokuapp.com/session/create-new-session', {
+    axios.post('http://localhost:4001/session/create-new-session', {
       quizsetID: this.state.quizsetID
     }).then(res => {
       this.setQuizSet(res.data.quizzes)
@@ -105,7 +105,7 @@ class GameHostPage extends Component {
         console.log("stats:", this.state.overallStats)
         console.log("pin:", this.state.gamePIN)
 
-        axios.post('https://guarded-gorge-11703.herokuapp.com/session/save-history', {
+        axios.post('http://localhost:4001/session/save-history', {
           gamePIN: this.state.gamePIN,
           stats: this.state.overallStats
         }).then(res => {

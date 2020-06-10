@@ -20,7 +20,7 @@ class LoginForm extends Component{
  
   submitForm (e){
     e.preventDefault()
-    axios.post('https://guarded-gorge-11703.herokuapp.com/users/user-login', {
+    axios.post('http://localhost:4001/users/user-login', {
        username: this.state.username, password: this.state.password
     }).then(res => {
        if (res.data.username == null ) {

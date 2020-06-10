@@ -35,11 +35,11 @@ const port = process.env.PORT || 4001;
 var app = express();
 
 // Static files directory
-app.use(express.static(path.join(__dirname, 'client', 'build')));
+app.use(express.static(path.join(__dirname, '..', 'client', 'build')));
 
 // CORS
 app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "https://guarded-gorge-11703.herokuapp.com"); // update to match the domain you will make the request from
+  res.header("Access-Control-Allow-Origin", "http://localhost:3000"); // update to match the domain you will make the request from
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
@@ -93,7 +93,7 @@ app.use('/session', sessionRouter);
 
 // Load react app
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
+  res.sendFile(path.join(__dirname, '..', 'client', 'build', 'index.html'));
 });
 
 
@@ -223,7 +223,7 @@ io.on('connection', socket => {
   // Remove player from game session and notify host
   socket.on('player leave', (info) => {
     console.log(info.nickname, 'from game', info.gamePIN, 'has left')
-    axios.post('https://guarded-gorge-11703.herokuapp.com/session/remove-player', {
+    axios.post('http://localhost:4001/session/remove-player', {
       gamePIN: info.gamePIN,
       player: info.nickname
     }).then(res => {
@@ -241,7 +241,7 @@ io.on('connection', socket => {
   // Notify players that a host has disconnected
   socket.on('host leave', (info) => {
     console.log("Host of", info.gamePIN, "has left. Disconnecting players...")
-    axios.post('https://guarded-gorge-11703.herokuapp.com/session/remove-session', {
+    axios.post('http://localhost:4001/session/remove-session', {
       gamePIN: info.gamePIN
     }).then(res => {
       console.log("emitting:", "host left" + info.gamePIN)

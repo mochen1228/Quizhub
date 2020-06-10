@@ -18,7 +18,7 @@ class RegisterForm extends Component{
   }
 
   createNewUser() {
-    axios.post('https://guarded-gorge-11703.herokuapp.com/users/create-user', {
+    axios.post('http://localhost:4001/users/create-user', {
       user: this.state
     }).then(res => {
       if (res) {
