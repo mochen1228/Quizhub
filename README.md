@@ -1,5 +1,5 @@
 # Quizhub
-Repository for team16
+
 
 ## Visit our website
 
