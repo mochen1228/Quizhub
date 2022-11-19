@@ -10,7 +10,7 @@
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "react-router-dom": "^5.1.2",
-    "react-scripts": "3.4.0",
+    "react-scripts": "5.0.1",
     "rough-charts": "^0.4.2-alpha.0",
     "semantic-ui-react": "^0.88.2",
     "socket.io-client": "^2.3.0"
